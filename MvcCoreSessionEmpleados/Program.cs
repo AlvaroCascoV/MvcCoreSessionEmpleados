@@ -1,8 +1,20 @@
+using Microsoft.EntityFrameworkCore;
+using MvcCoreSessionEmpleados.Data;
+using MvcCoreSessionEmpleados.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
 
+string connectionString = builder.Configuration.GetConnectionString("SqlHospital");
+builder.Services.AddTransient<RepositoryEmpleados>();
+builder.Services.AddDbContext<HospitalContext>(options =>
+    options.UseSqlServer(connectionString));
+
+
+builder.Services.AddControllersWithViews();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -17,8 +29,9 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthorization();
-
 app.MapStaticAssets();
+
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
