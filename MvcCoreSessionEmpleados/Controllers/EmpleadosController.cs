@@ -2,6 +2,7 @@
 using MvcCoreSessionEmpleados.Extensions;
 using MvcCoreSessionEmpleados.Models;
 using MvcCoreSessionEmpleados.Repositories;
+using System.Threading.Tasks;
 
 namespace MvcCoreSessionEmpleados.Controllers
 {
@@ -102,9 +103,21 @@ namespace MvcCoreSessionEmpleados.Controllers
             List<Empleado> empleados = await this.repo.GetEmpleadosAsync();
             return View(empleados);
         }
-        public IActionResult EmpleadosAlmacenadosOk()
+        public async Task<IActionResult> EmpleadosAlmacenadosOk()
         {
-            return View();
+            //para mostrar empleados en vez de ids
+            //RECUPERAMOS LA COLECCION DE SESSION
+            List<int> idsEmpleados = HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
+            if(idsEmpleados == null)
+            {
+                ViewData["MENSAJE"] = "No existen empleados en Session";
+                return View();
+            }
+            else
+            {
+                List<Empleado> empleados = await this.repo.GetEmpleadosSessionAsync(idsEmpleados);
+                return View(empleados);
+            }
         }
     }
 }
