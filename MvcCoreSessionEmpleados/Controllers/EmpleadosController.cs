@@ -122,32 +122,33 @@ namespace MvcCoreSessionEmpleados.Controllers
         //ahora que se borre los que tengo almacenados
         public async Task<IActionResult> SessionEmpleadosV4(int? idempleado)
         {
-            List<Empleado> empleados;
             if (idempleado != null)
             {
-                List<int> idsEmpleados;
-                if(HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS") != null)
+                List<int> idsEmpleadosList;
+                if (HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS") != null)
                 {
-                    //RECUPERAMOS LA COLECCION
-                    idsEmpleados = HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
-                    empleados = await this.repo.GetEmpleadosNotSessionAsync(idsEmpleados);
+                    idsEmpleadosList = HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
                 }
                 else
                 {
-                    //CREAMOS LA COLECCION
-                    idsEmpleados = new List<int>();
+                    idsEmpleadosList = new List<int>();
                 }
-                if (!idsEmpleados.Contains(idempleado.Value))
-                {
-                    //ALMACENAMOS EL ID DEL EMPLEADO
-                    idsEmpleados.Add(idempleado.Value);
-                    //ALMACENAMOS EN SESSION LOS DATOS
-                    HttpContext.Session.SetObject("IDSEMPLEADOS", idsEmpleados);
-                    ViewData["MENSAJE"] = "Empleados almacenados: " + idsEmpleados.Count;
-                }
+                idsEmpleadosList.Add(idempleado.Value);
+                HttpContext.Session.SetObject("IDSEMPLEADOS", idsEmpleadosList);
+                ViewData["MENSAJE"] = "Empleados almacenados: " + idsEmpleadosList.Count;
             }
-            empleados = await this.repo.GetEmpleadosNotSessionAsync(HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS"));
-            return View(empleados);
+            //REVISAMOS SI EXISTE LA SESSION
+            List<int> idsEmpleados = HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
+            if (idsEmpleados == null)
+            {
+                List<Empleado> empleados = await this.repo.GetEmpleadosAsync();
+                return View(empleados);
+            }
+            else
+            {
+                List<Empleado> empleados = await this.repo.GetEmpleadosNotSessionAsync(idsEmpleados);
+                return View(empleados);
+            }
         }
         public async Task<IActionResult> EmpleadosAlmacenadosV4()
         {
