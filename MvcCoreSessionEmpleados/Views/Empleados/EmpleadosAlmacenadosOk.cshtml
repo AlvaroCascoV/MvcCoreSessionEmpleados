@@ -1,0 +1,30 @@
+﻿@{
+    List<int> idsEmpleados = Context.Session.GetObject<List<int>>("IDSEMPLEADOS");
+}
+
+<h1 style="color:green">Empleados Almacenados OK</h1>
+<p>
+    <a asp-controller="Empleados" asp-action="SessionEmpleadosOk">Volver a Session empleados OK</a>
+</p>
+@if (idsEmpleados != null)
+{
+    <table class="table table-success">
+        <thead>
+            <tr>
+                <th>IdEmpleado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in idsEmpleados)
+            {
+                <tr>
+                    <td>@item</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h2 style="color:red">No tiene idsempleados almacenados</h2>
+}

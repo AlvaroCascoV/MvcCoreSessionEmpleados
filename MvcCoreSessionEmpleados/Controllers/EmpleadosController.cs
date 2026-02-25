@@ -48,7 +48,7 @@ namespace MvcCoreSessionEmpleados.Controllers
             if (idEmpleado != null)
             {
                 Empleado empleado = await this.repo.FindEmpleadoAsync(idEmpleado.Value);
-                //EN SESSION TENDREMOS ALMACENADOS UN CONJUNTO DE EMPLEADOS
+                //EN SESSION TENDREMOS ALMACENADOS UN CONJUNTO DE EMPLEADOS (ineficaz, mejor guardar datos como ids)
                 List<Empleado> empleadosList;
 
                 //DEBEMOS PREGUNTAR SI YA TENEMOS EMPLEADOS EN SESSION
@@ -73,6 +73,36 @@ namespace MvcCoreSessionEmpleados.Controllers
         }
 
         public IActionResult EmpleadosAlmacenados()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> SessionEmpleadosOk(int? idempleado)
+        {
+            if (idempleado != null)
+            {
+                //ALMACENAMOS LO MINIMO...
+                List<int> idsEmpleados;
+                if(HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS") != null)
+                {
+                    //RECUPERAMOS LA COLECCION
+                    idsEmpleados = HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
+                }
+                else
+                {
+                    //CREAMOS LA COLECCION
+                    idsEmpleados = new List<int>();
+                }
+                //ALMACENAMOS EL ID DEL EMPLEADO
+                idsEmpleados.Add(idempleado.Value);
+                //ALMACENAMOS EN SESSION LOS DATOS
+                HttpContext.Session.SetObject("IDSEMPLEADOS", idsEmpleados);
+                ViewData["MENSAJE"] = "Empleados almacenados: " + idsEmpleados.Count;
+            }
+            List<Empleado> empleados = await this.repo.GetEmpleadosAsync();
+            return View(empleados);
+        }
+        public IActionResult EmpleadosAlmacenadosOk()
         {
             return View();
         }
