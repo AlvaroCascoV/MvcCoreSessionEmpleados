@@ -1,15 +1,15 @@
 ﻿@model List<Empleado>
 
-<h1 style="color:yellow">Empleados Almacenados V4</h1>
+<h1 style="color:coral">Empleados Almacenados V5</h1>
 <p>
-    <a asp-controller="Empleados" asp-action="SessionEmpleadosV4">Volver a Session empleados V4</a>
+    <a asp-controller="Empleados" asp-action="SessionEmpleadosV5">Volver a Session empleados V5</a>
 </p>
 
-<h2 style="color:red">@ViewData["MENSAJE"]</h2>
+<h2 style="color:green">@ViewData["MENSAJE"]</h2>
 
 @if (Model != null)
 {
-    <table class="table table-danger">
+    <table class="table table-secondary">
         <thead>
             <tr>
                 <th>IdEmpleado</th>
