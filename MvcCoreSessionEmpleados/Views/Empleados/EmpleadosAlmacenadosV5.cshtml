@@ -5,7 +5,10 @@
     <a asp-controller="Empleados" asp-action="SessionEmpleadosV5">Volver a Session empleados V5</a>
 </p>
 
-<h2 style="color:green">@ViewData["MENSAJE"]</h2>
+@if(Context.Session.GetString("IDSEMPLEADOS") == null)
+{
+    <h2 style="color:green">No hay empleados almacenados en Session</h2>
+}
 
 @if (Model != null)
 {
@@ -17,6 +20,7 @@
                 <th>Oficio</th>
                 <th>Salario</th>
                 <th>IdDepartamento</th>
+                <th>Accion</th>
             </tr>
         </thead>
         <tbody>
@@ -28,6 +32,9 @@
                     <td>@item.Oficio</td>
                     <td>@item.Salario</td>
                     <td>@item.IdDepartamento</td>
+                    <td>
+                        <a asp-controller="Empleados" asp-action="EmpleadosAlmacenadosV5" asp-route-ideliminar="@item.IdEmpleado" class="btn btn-danger">Eliminar de Session</a>
+                    </td>
                 </tr>
             }
         </tbody>

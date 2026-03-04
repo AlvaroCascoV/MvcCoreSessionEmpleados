@@ -187,7 +187,7 @@ namespace MvcCoreSessionEmpleados.Controllers
             List<Empleado> empleados = await this.repo.GetEmpleadosAsync();
             return View(empleados);
         }
-        public async Task<IActionResult> EmpleadosAlmacenadosV5()
+        public async Task<IActionResult> EmpleadosAlmacenadosV5(int? ideliminar)
         {
             List<int> idsEmpleados = HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
             if(idsEmpleados == null)
@@ -197,9 +197,28 @@ namespace MvcCoreSessionEmpleados.Controllers
             }
             else
             {
-                List<Empleado> empleados = await this.repo.GetEmpleadosSessionAsync(idsEmpleados);
-                return View(empleados);
+                //PREGUNTAMOS SI HEMOS RECIBIDO EL ID DEL EMPLEADO A ELIMINAR
+                if (ideliminar != null)
+                {
+                    idsEmpleados.Remove(ideliminar.Value);
+                    //SI NO TENEMOS EMPLEADOS EN SESSION,
+                    //NUESTRA COLECCION SIGUE EXISTIENDO PERO SE QUEDA A 0
+                    //HAY QUE ELIMINAR LA SESSION
+                    if(idsEmpleados.Count == 0)
+                    {
+                        HttpContext.Session.Remove("IDSEMPLEADOS");
+                        return View();
+                    }
+                    else
+                    {
+                        //ACTUALIZAMOS SESSION
+                        HttpContext.Session.SetObject("IDSEMPLEADOS", idsEmpleados);
+                        List<Empleado> empleados = await this.repo.GetEmpleadosSessionAsync(idsEmpleados);
+                        return View(empleados);
+                    }
+                }
             }
+            return View();
         }
     }
 }
