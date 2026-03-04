@@ -7,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+//añadimos el memory cache para el cache personalizado
+builder.Services.AddMemoryCache();
 
 string connectionString = builder.Configuration.GetConnectionString("SqlHospital");
 builder.Services.AddTransient<RepositoryEmpleados>();

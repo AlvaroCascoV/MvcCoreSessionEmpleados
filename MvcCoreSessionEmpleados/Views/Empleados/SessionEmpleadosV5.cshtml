@@ -1,14 +1,38 @@
-﻿@model List<Empleado>
+﻿@*
+@using Microsoft.Extensions.Caching.Memory 
+@inject IMemoryCache memoryCache
 
+//esto está en el viewImports *@ 
+@model List<Empleado>
 @{
     //NECESITAMOS SESSION EN LA VISTA PARA COMPROBAR SUS DATOS
     List<int> ids = Context.Session.GetObject<List<int>>("IDSEMPLEADOS");
+    //recuperamos el memorycache
+    List<Empleado> favoritos = memoryCache.Get<List<Empleado>>("FAVORITOS");
 }
 
 <h1 style="color:coral">Session Empleados List V5</h1>
 
+@if(ids != null)
+{
+    <h4 style="background-color:green">Empleados Almacenados en Session: <b>@ids.Count</b></h4>
+}
+else
+{
+    <h4 style="background-color:green">Empleados Almacenados en Session: <b>0</b></h4>
+}
+@if(favoritos != null)
+{
+    <h4 style="background-color:coral">Empleados Favoritos: <b>@favoritos.Count</b></h4>
+}
+else
+{
+    <h4 style="background-color:coral">Empleados Favoritos: <b>0</b></h4>
+}
+
 <p>
     <a asp-controller="Empleados" asp-action="EmpleadosAlmacenadosV5" class="btn btn-info">Empleados Almacenados V5</a>
+    <a asp-controller="Empleados" asp-action="EmpleadosFavoritos" class="btn btn-primary">Favoritos</a>
 </p>
 
 <h4 style="color:coral">@ViewData["MENSAJE"]</h4>
@@ -18,6 +42,9 @@
     {
         <li class="list-group-item list-group-item-danger">
             @empleado.Apellido
+            
+            <a asp-controller="Empleados" asp-action="SessionEmpleadosV5" asp-route-idfavorito="@empleado.IdEmpleado" class="btn btn-primary">Favorito</a>
+            
             @* PREGUNTAMOS SI EXISTE EL EMPLEADO EN SESSION *@
             @if (ids == null)
             {

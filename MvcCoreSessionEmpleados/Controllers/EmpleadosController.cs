@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using MvcCoreSessionEmpleados.Extensions;
 using MvcCoreSessionEmpleados.Models;
 using MvcCoreSessionEmpleados.Repositories;
@@ -9,9 +10,11 @@ namespace MvcCoreSessionEmpleados.Controllers
     public class EmpleadosController : Controller
     {
         RepositoryEmpleados repo;
-        public EmpleadosController(RepositoryEmpleados repo)
+        IMemoryCache memoryCache;
+        public EmpleadosController(RepositoryEmpleados repo, IMemoryCache memoryCache)
         {
             this.repo = repo;
+            this.memoryCache = memoryCache;
         }
 
         public async Task<IActionResult> SessionSalarios(int? salario)
@@ -167,7 +170,10 @@ namespace MvcCoreSessionEmpleados.Controllers
             }
         }
         //deshabilitar el boton y mostrar otra cosa
-        public async Task<IActionResult> SessionEmpleadosV5(int? idempleado)
+        //añadimos cache basico, vemos que no funcionan juntas
+        //[ResponseCache(Duration = 80,Location = ResponseCacheLocation.Client)]
+        //ahora añadimos el memorycache para favoritos
+        public async Task<IActionResult> SessionEmpleadosV5(int? idempleado, int? idfavorito)
         {
             if (idempleado != null)
             {
@@ -184,9 +190,34 @@ namespace MvcCoreSessionEmpleados.Controllers
                 HttpContext.Session.SetObject("IDSEMPLEADOS", idsEmpleadosList);
                 ViewData["MENSAJE"] = "Empleados almacenados: " + idsEmpleadosList.Count;
             }
+
+            //añadimos memoryCache
+            if(idfavorito != null)
+            {
+                //COMO ESTOY ALMACENANDO EN CACHE, VAMOS A GUARDAR
+                //DIRECTAMENTE LOS OBJETOS EN LUGAR DE LOS IDS            
+                List<Empleado> empleadosFavoritos;
+                if(this.memoryCache.Get("FAVORITOS") == null)
+                {
+                    //si no existe, lo creamos
+                    empleadosFavoritos = new List<Empleado>();
+                }
+                else
+                {
+                    //si hay, lo recuperamos
+                    empleadosFavoritos = this.memoryCache.Get<List<Empleado>>("FAVORITOS");
+                }
+                //buscamos al empleado para guardarlo
+                Empleado empleadoFavorito = await this.repo.FindEmpleadoAsync(idfavorito.Value);
+                empleadosFavoritos.Add(empleadoFavorito);
+                this.memoryCache.Set("FAVORITOS", empleadosFavoritos);
+            }
+
             List<Empleado> empleados = await this.repo.GetEmpleadosAsync();
             return View(empleados);
         }
+        //añadimos cache basico, vemos que no funcionan juntas
+        //[ResponseCache(Duration = 80, Location = ResponseCacheLocation.Client)]
         public async Task<IActionResult> EmpleadosAlmacenadosV5(int? ideliminar)
         {
             List<int> idsEmpleados = HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
@@ -213,11 +244,26 @@ namespace MvcCoreSessionEmpleados.Controllers
                     {
                         //ACTUALIZAMOS SESSION
                         HttpContext.Session.SetObject("IDSEMPLEADOS", idsEmpleados);
-                        List<Empleado> empleados = await this.repo.GetEmpleadosSessionAsync(idsEmpleados);
-                        return View(empleados);
                     }
                 }
+                List<Empleado> empleados = await this.repo.GetEmpleadosSessionAsync(idsEmpleados);
+                return View(empleados);
             }
+        }
+
+        public IActionResult EmpleadosFavoritos()
+        {
+            //if(this.memoryCache.Get("FAVORITOS") == null)
+            //{
+            //    ViewData["MENSAJE"] = "No tenemos favoritos";
+            //    return View();
+            //}
+            //else
+            //{
+            //    List<Empleado> favoritos = this.memoryCache.Get<List<Empleado>>("FAVORITOS");
+            //    return View(favoritos);
+            //}
+            //vamos a pintarlos desde la view
             return View();
         }
     }
