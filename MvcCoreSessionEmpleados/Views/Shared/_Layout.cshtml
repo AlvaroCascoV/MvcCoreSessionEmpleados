@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@{
+    //añadimos contadores en el layout
+    List<int> ids = Context.Session.GetObject<List<int>>("IDSEMPLEADOS");
+    List<Empleado> favoritos = memoryCache.Get<List<Empleado>>("FAVORITOS");
+}
+
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -22,6 +29,24 @@
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Empleados" asp-action="Index">Empleados</a>
+                        </li>
+                        <li class="nav-item">
+                            @if (ids != null)
+                            {
+                                <span>Ses: <b>@ids.Count</b></span>
+                            }
+                            else
+                            {
+                                <span>Ses: <b>0</b></span>
+                            }
+                            @if (favoritos != null)
+                            {
+                                <span>Favs: <b>@favoritos.Count</b></span>
+                            }
+                            else
+                            {
+                                <span>Favs: <b>0</b></span>
+                            }
                         </li>
                     </ul>
                 </div>

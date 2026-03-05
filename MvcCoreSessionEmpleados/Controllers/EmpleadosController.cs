@@ -191,7 +191,7 @@ namespace MvcCoreSessionEmpleados.Controllers
                 ViewData["MENSAJE"] = "Empleados almacenados: " + idsEmpleadosList.Count;
             }
 
-            //añadimos memoryCache
+            //añadimos memoryCache para favoritos
             if(idfavorito != null)
             {
                 //COMO ESTOY ALMACENANDO EN CACHE, VAMOS A GUARDAR
@@ -251,7 +251,7 @@ namespace MvcCoreSessionEmpleados.Controllers
             }
         }
 
-        public IActionResult EmpleadosFavoritos()
+        public IActionResult EmpleadosFavoritos(int? ideliminar)
         {
             //if(this.memoryCache.Get("FAVORITOS") == null)
             //{
@@ -264,6 +264,23 @@ namespace MvcCoreSessionEmpleados.Controllers
             //    return View(favoritos);
             //}
             //vamos a pintarlos desde la view
+
+            if (ideliminar != null)
+            {
+                List<Empleado> empFavoritos = this.memoryCache.Get<List<Empleado>>("FAVORITOS");
+                //BUSCAMOS AL EMPLEADO A ELIMINAR POR SU ID
+                Empleado delete = empFavoritos.Find(z => z.IdEmpleado == ideliminar.Value);
+                empFavoritos.Remove(delete);
+
+                if (empFavoritos.Count == 0)
+                {
+                    this.memoryCache.Remove("FAVORITOS");
+                }
+                else
+                {
+                    this.memoryCache.Set("FAVORITOS", empFavoritos);
+                }
+            }
             return View();
         }
     }
