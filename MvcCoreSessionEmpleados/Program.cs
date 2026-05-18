@@ -11,10 +11,12 @@ builder.Services.AddSession();
 builder.Services.AddMemoryCache();
 
 string connectionString = builder.Configuration.GetConnectionString("SqlHospital");
-builder.Services.AddTransient<RepositoryEmpleados>();
-builder.Services.AddDbContext<HospitalContext>(options =>
-    options.UseSqlServer(connectionString));
+string connectionStringAzure = builder.Configuration.GetConnectionString("SqlAzure");
 
+builder.Services.AddDbContext<HospitalContext>(options =>
+    options.UseSqlServer(connectionStringAzure));
+
+builder.Services.AddTransient<RepositoryEmpleados>();
 
 builder.Services.AddControllersWithViews();
 var app = builder.Build();
